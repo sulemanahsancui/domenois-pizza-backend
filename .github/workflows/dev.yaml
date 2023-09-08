@@ -21,7 +21,7 @@ jobs:
         
       - name: Docker stop and remove
         run: |
-          CONTAINER_NAME="backend-dev-c"
+          CONTAINER_NAME="backend-dev"
 
           if [[ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)" == "true" ]]; then
             echo "Stopping Docker container $CONTAINER_NAME"
@@ -31,10 +31,10 @@ jobs:
           fi
       
       - name: Docker Start 
-        run: docker run -d --name backend-dev-c -p 4000:4000 --restart always backend-dev
+        run: docker run -d --name backend-dev -p 4000:4000 --restart always backend-dev
         
       - name: Docker show logs 
-        run: sleep 30 && docker logs backend-dev-c
+        run: sleep 30 && docker logs backend-dev
 
       - name: Clean up interim docker
         run: docker image prune -f && docker container prune -f
