@@ -1,0 +1,40 @@
+name: Deploy Dev branch
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  API_GATEWAY_STAGE: main
+
+jobs:
+  deploy:
+    name: build and deploy Dev docker image
+    runs-on: self-hosted
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: docker build
+        run: docker build -t backend-dev .
+        
+      - name: Docker stop and remove
+        run: |
+          CONTAINER_NAME="backend-dev-c"
+
+          if [[ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)" == "true" ]]; then
+            echo "Stopping Docker container $CONTAINER_NAME"
+            docker stop $CONTAINER_NAME && docker rm $CONTAINER_NAME && sudo docker system prune -f
+          else
+            echo "Docker container $CONTAINER_NAME is not running"
+          fi
+      
+      - name: Docker Start 
+        run: docker run -d --name backend-dev-c -p 3000:3000 --restart always backend-dev
+        
+      - name: Docker show logs 
+        run: sleep 30 && docker logs backend-dev-c
+
+      - name: Clean up interim docker
+        run: docker image prune -f && docker container prune -f
